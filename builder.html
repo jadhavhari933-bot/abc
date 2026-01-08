@@ -8,7 +8,7 @@
 <style>
 body{
   margin:0;
-  font-family:Inter,Arial,sans-serif;
+  font-family:Inter, Arial, sans-serif;
   background:#f5f7fb;
   display:flex;
   justify-content:center;
@@ -17,7 +17,7 @@ body{
 }
 
 .card{
-  background:#fff;
+  background:#ffffff;
   width:420px;
   padding:26px;
   border-radius:22px;
@@ -30,14 +30,14 @@ h2{
   color:#0D3B66;
 }
 
-p.sub{
+.sub{
   text-align:center;
   font-size:14px;
   color:#555;
   margin-top:6px;
 }
 
-input,textarea{
+input, textarea{
   width:100%;
   margin-top:14px;
   padding:14px;
@@ -46,15 +46,8 @@ input,textarea{
   font-size:15px;
 }
 
-textarea{resize:none}
-
-input[type=file]{padding:10px}
-
-img.preview{
-  width:100%;
-  margin-top:12px;
-  border-radius:14px;
-  display:none;
+textarea{
+  resize:none;
 }
 
 button{
@@ -105,16 +98,19 @@ button{
 
 <div class="card">
   <h2>PayMoney Builder</h2>
-  <p class="sub">Create smart UPI payment link</p>
+  <p class="sub">Create smart payment landing page link</p>
 
   <input id="title" placeholder="Title (eg. Online Course)">
   <textarea id="desc" rows="2" placeholder="Description"></textarea>
   <input id="amount" type="number" placeholder="Amount (₹)">
-  <input id="upi" placeholder="Your UPI ID (example@upi)">
+  <input id="upi" placeholder="UPI ID (example@upi)">
 
-  <!-- IMAGE UPLOAD -->
-  <input type="file" id="imgUpload" accept="image/*">
-  <img id="preview" class="preview">
+  <!-- IMAGE URL -->
+  <input id="imageUrl" placeholder="Image URL (https://...)">
+
+  <!-- WHATSAPP GROUP -->
+  <input id="groupName" placeholder="Access Group Name (eg. VIP Learning Group)">
+  <input id="groupLink" placeholder="WhatsApp Group Link (https://chat.whatsapp.com/...)">
 
   <button onclick="generate()">Generate Landing Page Link</button>
 
@@ -124,52 +120,40 @@ button{
   </div>
 
   <div class="note">
-    One link • Mobile UPI • Desktop QR
+    One link • Mobile UPI • Desktop QR • WhatsApp Group Access
   </div>
 </div>
 
 <script>
-let imageData = "";
 let finalURL = "";
 
-/* IMAGE PREVIEW */
-document.getElementById("imgUpload").addEventListener("change", e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    imageData = reader.result;
-    const img = document.getElementById("preview");
-    img.src = imageData;
-    img.style.display = "block";
-  };
-  reader.readAsDataURL(file);
-});
-
-/* GENERATE LINK */
 function generate(){
   const title = encodeURIComponent(document.getElementById("title").value);
   const desc  = encodeURIComponent(document.getElementById("desc").value);
   const amt   = document.getElementById("amount").value;
   const upi   = document.getElementById("upi").value.trim();
+  const img   = document.getElementById("imageUrl").value.trim();
+  const gname = encodeURIComponent(document.getElementById("groupName").value);
+  const glink = encodeURIComponent(document.getElementById("groupLink").value);
 
-  if(!upi || upi.indexOf("@")===-1){
+  if(!upi || upi.indexOf("@") === -1){
     alert("Enter valid UPI ID");
     return;
   }
-  if(!amt || amt<=0){
+  if(!amt || amt <= 0){
     alert("Enter valid amount");
     return;
   }
 
   finalURL =
-  "https://www.paymoney24.in/lp.html" +
-  "?title=" + title +
-  "&desc=" + desc +
-  "&amount=" + amt +
-  "&upi=" + encodeURIComponent(upi) +
-  "&image=" + encodeURIComponent(imageData);
+    "https://www.paymoney24.in/lp.html" +
+    "?title=" + title +
+    "&desc=" + desc +
+    "&amount=" + amt +
+    "&upi=" + encodeURIComponent(upi) +
+    "&image=" + encodeURIComponent(img) +
+    "&group=" + gname +
+    "&grouplink=" + glink;
 
   document.getElementById("finalLink").innerText = finalURL;
   document.getElementById("result").style.display = "block";
@@ -179,12 +163,10 @@ function generate(){
   btn.classList.remove("copied");
 }
 
-/* OPEN LINK */
 function openLink(){
   window.open(finalURL, "_blank");
 }
 
-/* COPY */
 function copyLink(){
   navigator.clipboard.writeText(finalURL).then(()=>{
     const btn = document.getElementById("copyBtn");
