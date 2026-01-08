@@ -2,119 +2,100 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PayMoney – Generate Payment Link</title>
+<title>PayMoney Builder</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   margin:0;
-  font-family:Inter, Arial, sans-serif;
+  font-family:Inter,Arial,sans-serif;
   background:#f5f7fb;
   display:flex;
-  align-items:center;
   justify-content:center;
-  height:100vh;
+  align-items:center;
+  min-height:100vh;
 }
 
 .card{
-  background:#ffffff;
-  width:380px;
-  padding:28px;
-  border-radius:20px;
-  box-shadow:0 14px 40px rgba(0,0,0,.15);
-  text-align:center;
+  background:#fff;
+  width:420px;
+  padding:26px;
+  border-radius:22px;
+  box-shadow:0 18px 45px rgba(0,0,0,.15);
 }
 
-.logo{
-  font-size:26px;
-  font-weight:800;
+h2{
+  margin:0;
+  text-align:center;
   color:#0D3B66;
 }
 
-.subtitle{
-  margin-top:6px;
-  font-size:15px;
+p.sub{
+  text-align:center;
+  font-size:14px;
   color:#555;
+  margin-top:6px;
 }
 
-input{
+input,textarea{
   width:100%;
+  margin-top:14px;
   padding:14px;
-  margin-top:16px;
-  font-size:15px;
-  border-radius:10px;
+  border-radius:12px;
   border:1px solid #ddd;
+  font-size:15px;
+}
+
+textarea{resize:none}
+
+input[type=file]{padding:10px}
+
+img.preview{
+  width:100%;
+  margin-top:12px;
+  border-radius:14px;
+  display:none;
 }
 
 button{
   width:100%;
   margin-top:20px;
-  padding:15px;
-  font-size:16px;
-  font-weight:600;
+  padding:16px;
   border:none;
-  border-radius:14px;
+  border-radius:16px;
   background:#0D3B66;
   color:#fff;
+  font-size:16px;
+  font-weight:700;
   cursor:pointer;
 }
 
-/* result area */
 .result{
-  margin-top:18px;
   display:none;
+  margin-top:18px;
 }
 
-/* payment link (only link, no button) */
-.paylink{
-  display:block;
-  margin-top:12px;
-  font-size:14px;
+.link{
+  font-size:13px;
   word-break:break-all;
   color:#0D3B66;
   text-decoration:underline;
   cursor:pointer;
 }
 
-/* animated copy button */
-.copy-btn{
+.copy{
   margin-top:12px;
-  padding:12px 18px;
-  font-size:14px;
-  font-weight:600;
-  border:none;
-  border-radius:12px;
-  background:#2FB344;
-  color:#fff;
-  cursor:pointer;
-  animation:pulse 2s infinite;
+  background:#16a34a;
 }
 
-.copy-btn.copied{
-  background:#1f7a32;
-  animation:none;
-}
-
-/* pulse animation */
-@keyframes pulse{
-  0%{ box-shadow:0 0 0 0 rgba(47,179,68,0.6); }
-  70%{ box-shadow:0 0 0 12px rgba(47,179,68,0); }
-  100%{ box-shadow:0 0 0 0 rgba(47,179,68,0); }
-}
-
-/* QR box */
-#qrBox{
-  display:none;
-  margin-top:16px;
-}
-
-#qrBox img{
-  width:220px;
+.copy.copied{
+  background:#15803d;
 }
 
 .note{
   margin-top:14px;
   font-size:12px;
+  text-align:center;
   color:#777;
 }
 </style>
@@ -123,90 +104,91 @@ button{
 <body>
 
 <div class="card">
-  <div class="logo">PayMoney</div>
-  <div class="subtitle">Generate Payment Link</div>
+  <h2>PayMoney Builder</h2>
+  <p class="sub">Create smart UPI payment link</p>
 
-  <input type="text" id="upi" placeholder="Enter your UPI ID (example@upi)">
-  <input type="number" id="amt" placeholder="Enter Amount (₹)">
+  <input id="title" placeholder="Title (eg. Online Course)">
+  <textarea id="desc" rows="2" placeholder="Description"></textarea>
+  <input id="amount" type="number" placeholder="Amount (₹)">
+  <input id="upi" placeholder="Your UPI ID (example@upi)">
 
-  <button onclick="generateLink()">Generate Payment Link</button>
+  <!-- IMAGE UPLOAD -->
+  <input type="file" id="imgUpload" accept="image/*">
+  <img id="preview" class="preview">
 
-  <div class="result" id="resultBox">
+  <button onclick="generate()">Generate Landing Page Link</button>
 
-    <!-- ONE SMART LINK -->
-    <a href="#" id="paymentLink" class="paylink" onclick="handlePayment(event)"></a>
-
-    <!-- COPY BUTTON -->
-    <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copy Link</button>
-
-    <!-- DESKTOP QR -->
-    <div id="qrBox">
-      <p><b>Scan & Pay</b></p>
-      <img id="qrImg">
-    </div>
+  <div class="result" id="result">
+    <div class="link" id="finalLink" onclick="openLink()"></div>
+    <button class="copy" id="copyBtn" onclick="copyLink()">Copy Link</button>
   </div>
 
   <div class="note">
-    One link • Mobile pays • Desktop shows QR
+    One link • Mobile UPI • Desktop QR
   </div>
 </div>
 
 <script>
-var generatedLink = "";
+let imageData = "";
+let finalURL = "";
 
-function generateLink(){
-  var upi = document.getElementById("upi").value.trim();
-  var amt = document.getElementById("amt").value;
+/* IMAGE PREVIEW */
+document.getElementById("imgUpload").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
 
-  if(!upi || upi.indexOf("@") === -1){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    imageData = reader.result;
+    const img = document.getElementById("preview");
+    img.src = imageData;
+    img.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+});
+
+/* GENERATE LINK */
+function generate(){
+  const title = encodeURIComponent(document.getElementById("title").value);
+  const desc  = encodeURIComponent(document.getElementById("desc").value);
+  const amt   = document.getElementById("amount").value;
+  const upi   = document.getElementById("upi").value.trim();
+
+  if(!upi || upi.indexOf("@")===-1){
     alert("Enter valid UPI ID");
     return;
   }
-  if(!amt || amt <= 0){
+  if(!amt || amt<=0){
     alert("Enter valid amount");
     return;
   }
 
-  generatedLink =
-    "upi://pay?pa=" + encodeURIComponent(upi) +
-    "&pn=PayMoney" +
-    "&am=" + amt +
-    "&cu=INR";
+  finalURL =
+  "https://www.paymoney24.in/lp.html" +
+  "?title=" + title +
+  "&desc=" + desc +
+  "&amount=" + amt +
+  "&upi=" + encodeURIComponent(upi) +
+  "&image=" + encodeURIComponent(imageData);
 
-  var linkEl = document.getElementById("paymentLink");
-  linkEl.textContent = generatedLink;
+  document.getElementById("finalLink").innerText = finalURL;
+  document.getElementById("result").style.display = "block";
 
-  document.getElementById("resultBox").style.display = "block";
-  document.getElementById("qrBox").style.display = "none";
-
-  // reset copy button
-  var btn = document.getElementById("copyBtn");
-  btn.textContent = "Copy Link";
+  const btn = document.getElementById("copyBtn");
+  btn.innerText = "Copy Link";
   btn.classList.remove("copied");
 }
 
-function handlePayment(e){
-  e.preventDefault();
-
-  // Mobile → open UPI app
-  if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
-    window.location.href = generatedLink;
-  }
-  // Desktop → show QR
-  else{
-    var qr =
-      "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-      encodeURIComponent(generatedLink);
-
-    document.getElementById("qrImg").src = qr;
-    document.getElementById("qrBox").style.display = "block";
-  }
+/* OPEN LINK */
+function openLink(){
+  window.open(finalURL, "_blank");
 }
 
+/* COPY */
 function copyLink(){
-  navigator.clipboard.writeText(generatedLink).then(()=>{
-    var btn = document.getElementById("copyBtn");
-    btn.textContent = "Copied ✓";
+  navigator.clipboard.writeText(finalURL).then(()=>{
+    const btn = document.getElementById("copyBtn");
+    btn.innerText = "Copied ✓";
     btn.classList.add("copied");
   });
 }
