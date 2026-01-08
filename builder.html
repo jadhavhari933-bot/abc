@@ -2,189 +2,215 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PayMoney – Create Payment Link</title>
+<title>PayMoney – Generate Payment Link</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-*{box-sizing:border-box;font-family:Inter,system-ui,Arial}
-body{margin:0;background:#f5f7fb}
-.container{
-  max-width:540px;
-  margin:40px auto;
-  background:#fff;
-  padding:26px;
-  border-radius:16px;
-  box-shadow:0 20px 45px rgba(0,0,0,.08)
+body{
+  margin:0;
+  font-family:Inter, Arial, sans-serif;
+  background:#f5f7fb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
 }
-h1{margin:0 0 18px;font-size:22px}
-label{
-  display:block;
-  margin-top:16px;
-  font-weight:600;
-  font-size:14px
+
+.card{
+  background:#ffffff;
+  width:380px;
+  padding:28px;
+  border-radius:20px;
+  box-shadow:0 14px 40px rgba(0,0,0,.15);
+  text-align:center;
 }
-input,textarea{
+
+.logo{
+  font-size:26px;
+  font-weight:800;
+  color:#0D3B66;
+}
+
+.subtitle{
+  margin-top:6px;
+  font-size:15px;
+  color:#555;
+}
+
+input{
   width:100%;
-  padding:12px;
-  margin-top:6px;
+  padding:14px;
+  margin-top:16px;
+  font-size:15px;
   border-radius:10px;
-  border:1px solid #dbe1ea;
-  font-size:14px
+  border:1px solid #ddd;
 }
-textarea{resize:vertical}
-small{
-  display:block;
-  margin-top:6px;
-  font-size:12px;
-  color:#64748b;
-  line-height:1.4
-}
+
 button{
   width:100%;
-  margin-top:26px;
+  margin-top:20px;
   padding:15px;
   font-size:16px;
-  font-weight:800;
+  font-weight:600;
+  border:none;
+  border-radius:14px;
+  background:#0D3B66;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* result area */
+.result{
+  margin-top:18px;
+  display:none;
+}
+
+/* payment link (only link, no button) */
+.paylink{
+  display:block;
+  margin-top:12px;
+  font-size:14px;
+  word-break:break-all;
+  color:#0D3B66;
+  text-decoration:underline;
+  cursor:pointer;
+}
+
+/* animated copy button */
+.copy-btn{
+  margin-top:12px;
+  padding:12px 18px;
+  font-size:14px;
+  font-weight:600;
   border:none;
   border-radius:12px;
-  cursor:pointer;
-  background:linear-gradient(135deg,#4f46e5,#4338ca);
+  background:#2FB344;
   color:#fff;
-  box-shadow:0 12px 28px rgba(79,70,229,.35)
+  cursor:pointer;
+  animation:pulse 2s infinite;
 }
+
+.copy-btn.copied{
+  background:#1f7a32;
+  animation:none;
+}
+
+/* pulse animation */
+@keyframes pulse{
+  0%{ box-shadow:0 0 0 0 rgba(47,179,68,0.6); }
+  70%{ box-shadow:0 0 0 12px rgba(47,179,68,0); }
+  100%{ box-shadow:0 0 0 0 rgba(47,179,68,0); }
+}
+
+/* QR box */
+#qrBox{
+  display:none;
+  margin-top:16px;
+}
+
+#qrBox img{
+  width:220px;
+}
+
 .note{
   margin-top:14px;
   font-size:12px;
-  color:#475569
+  color:#777;
 }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-  <h1>Create PayMoney Link</h1>
+<div class="card">
+  <div class="logo">PayMoney</div>
+  <div class="subtitle">Generate Payment Link</div>
 
-  <label>Title *</label>
-  <input id="title" placeholder="e.g. Online Workshop Fee">
+  <input type="text" id="upi" placeholder="Enter your UPI ID (example@upi)">
+  <input type="number" id="amt" placeholder="Enter Amount (₹)">
 
-  <label>Description *</label>
-  <textarea id="desc" rows="3" placeholder="Short details about this payment"></textarea>
+  <button onclick="generateLink()">Generate Payment Link</button>
 
-  <label>Amount (₹) *</label>
-  <input id="amount" type="number" placeholder="499">
+  <div class="result" id="resultBox">
 
-  <label>UPI ID *</label>
-  <input id="upi" placeholder="yourupi@bank">
+    <!-- ONE SMART LINK -->
+    <a href="#" id="paymentLink" class="paylink" onclick="handlePayment(event)"></a>
 
-  <label>Theme Color (optional)</label>
-  <input id="color" type="color" value="#4f46e5">
-  <small>Landing page buttons & highlights will use this color</small>
+    <!-- COPY BUTTON -->
+    <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copy Link</button>
 
-  <!-- 🔥 IMAGE UPLOAD (NEW) -->
-  <label>Upload Poster Image (optional)</label>
-  <input type="filasync function createLink(){
-
-  const file = imageFile.files[0];
-  let imageURL = image.value.trim(); // fallback URL
-
-  if(file){
-    const form = new FormData();
-    form.append("image", file);
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: form
-    });
-
-    const data = await res.json();
-    imageURL = data.imageUrl; // 🔥 short URL
-  }
-
-  const params = new URLSearchParams({
-    title: title.value,
-    desc: desc.value,
-    amount: amount.value,
-    upi: upi.value,
-    color: color.value,
-    image: imageURL,
-    video: video.value,
-    whatsapp: whatsapp.value,
-    group: group.value
-  });
-
-  window.open("lp.html?" + params.toString(), "_blank");
-}
-e" id="imageFile" accept="image/*">
-  <small>
-    Recommended sizes:<br>
-    • <strong>1080 × 1080 px</strong> (1:1)<br>
-    • <strong>1080 × 1920 px</strong> (9:16)<br>
-    If image is uploaded, it will be used instead of Image URL
-  </small>
-
-  <!-- IMAGE URL (BACKUP / OPTIONAL) -->
-  <label>Poster / Image URL (optional)</label>
-  <input id="image" placeholder="https://example.com/poster.jpg">
-
-  <label>YouTube / Video Link (optional)</label>
-  <input id="video" placeholder="https://youtube.com/watch?v=xxxx">
-
-  <label>WhatsApp Number (optional)</label>
-  <input id="whatsapp" placeholder="91XXXXXXXXXX">
-
-  <label>WhatsApp Group Link (optional)</label>
-  <input id="group" placeholder="https://chat.whatsapp.com/...">
-
-  <!-- ✅ INLINE onclick (MOST STABLE) -->
-  <button type="button" onclick="createLink()">Create Link</button>
+    <!-- DESKTOP QR -->
+    <div id="qrBox">
+      <p><b>Scan & Pay</b></p>
+      <img id="qrImg">
+    </div>
+  </div>
 
   <div class="note">
-    ✔ Mobile users: direct UPI payment<br>
-    ✔ Desktop users: QR code auto-generate
+    One link • Mobile pays • Desktop shows QR
   </div>
 </div>
 
 <script>
-function createLink(){
+var generatedLink = "";
 
-  const fileInput = document.getElementById("imageFile");
-  const file = fileInput && fileInput.files[0];
+function generateLink(){
+  var upi = document.getElementById("upi").value.trim();
+  var amt = document.getElementById("amt").value;
 
-  function proceed(imageData){
-    const params = new URLSearchParams({
-      title: title.value.trim(),
-      desc: desc.value.trim(),
-      amount: amount.value.trim(),
-      upi: upi.value.trim(),
-      color: color.value,
-      image: imageData || image.value.trim(), // upload > URL
-      video: video.value.trim(),
-      whatsapp: whatsapp.value.trim(),
-      group: group.value.trim()
-    });
-
-    if(!params.get('title') || !params.get('desc') || !params.get('amount') || !params.get('upi')){
-      alert("Please fill all required (*) fields");
-      return;
-    }
-
-    window.open("lp.html?" + params.toString(), "_blank");
+  if(!upi || upi.indexOf("@") === -1){
+    alert("Enter valid UPI ID");
+    return;
+  }
+  if(!amt || amt <= 0){
+    alert("Enter valid amount");
+    return;
   }
 
-  // 🔥 If image uploaded → convert to Base64
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      proceed(e.target.result);
-    };
-    reader.readAsDataURL(file);
-  }else{
-    proceed("");
+  generatedLink =
+    "upi://pay?pa=" + encodeURIComponent(upi) +
+    "&pn=PayMoney" +
+    "&am=" + amt +
+    "&cu=INR";
+
+  var linkEl = document.getElementById("paymentLink");
+  linkEl.textContent = generatedLink;
+
+  document.getElementById("resultBox").style.display = "block";
+  document.getElementById("qrBox").style.display = "none";
+
+  // reset copy button
+  var btn = document.getElementById("copyBtn");
+  btn.textContent = "Copy Link";
+  btn.classList.remove("copied");
+}
+
+function handlePayment(e){
+  e.preventDefault();
+
+  // Mobile → open UPI app
+  if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
+    window.location.href = generatedLink;
   }
+  // Desktop → show QR
+  else{
+    var qr =
+      "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
+      encodeURIComponent(generatedLink);
+
+    document.getElementById("qrImg").src = qr;
+    document.getElementById("qrBox").style.display = "block";
+  }
+}
+
+function copyLink(){
+  navigator.clipboard.writeText(generatedLink).then(()=>{
+    var btn = document.getElementById("copyBtn");
+    btn.textContent = "Copied ✓";
+    btn.classList.add("copied");
+  });
 }
 </script>
 
 </body>
 </html>
-
-
