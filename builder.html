@@ -9,11 +9,7 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Inter,system-ui,Arial;
-  background:#f1f5f9;
-}
+body{margin:0;font-family:Inter;background:#f1f5f9}
 .wrapper{
   max-width:1200px;
   margin:auto;
@@ -31,12 +27,7 @@ body{
   padding:24px;
   box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
-label{
-  font-weight:600;
-  font-size:14px;
-  margin-top:14px;
-  display:block;
-}
+label{font-weight:600;font-size:14px;margin-top:14px;display:block}
 input{
   width:100%;
   padding:12px 14px;
@@ -62,13 +53,8 @@ iframe{
   border:none;
   border-radius:14px;
 }
-.small-btn{
-  margin-top:10px;
-  background:#0f172a;
-}
-.share-btn{
-  background:#22c55e;
-}
+.small-btn{background:#0f172a}
+.share-btn{background:#22c55e}
 </style>
 </head>
 
@@ -104,7 +90,8 @@ iframe{
   <label>WhatsApp Group Link</label>
   <input id="wa" placeholder="https://chat.whatsapp.com/...">
 
-  <button onclick="generate()">Generate Live Preview</button>
+  <!-- IMPORTANT -->
+  <button id="genBtn">Generate Live Preview</button>
 </div>
 
 <!-- PREVIEW -->
@@ -113,15 +100,17 @@ iframe{
   <iframe id="preview"></iframe>
 
   <h4>Landing Page Link</h4>
-  <input id="publicLink" readonly onclick="this.select()">
+  <input id="publicLink" readonly>
 
-  <button class="small-btn" onclick="copyLink()">📋 Copy Link</button>
-  <button class="share-btn" onclick="shareWA()">📤 Share on WhatsApp</button>
+  <button class="small-btn" id="copyBtn">📋 Copy Link</button>
+  <button class="share-btn" id="shareBtn">📤 Share on WhatsApp</button>
 </div>
 
 </div>
 
 <script>
+console.log("Builder JS loaded"); // DEBUG LINE
+
 let uploadedImage = "";
 
 document.getElementById("imageFile").addEventListener("change", function(){
@@ -132,14 +121,20 @@ document.getElementById("imageFile").addEventListener("change", function(){
   reader.readAsDataURL(file);
 });
 
+document.getElementById("genBtn").addEventListener("click", generate);
+document.getElementById("copyBtn").addEventListener("click", copyLink);
+document.getElementById("shareBtn").addEventListener("click", shareWA);
+
 function generate(){
-  const c = color.value.replace("#","");
-  const h = headline.value;
-  const s = sub.value;
-  const vid = video.value;
-  const amt = amount.value;
-  const upiLink = upi.value;
-  const waLink = wa.value;
+  console.log("Generate clicked");
+
+  const c = document.getElementById("color").value.replace("#","");
+  const h = document.getElementById("headline").value || "Landing Page";
+  const s = document.getElementById("sub").value || "";
+  const vid = document.getElementById("video").value;
+  const amt = document.getElementById("amount").value;
+  const upiLink = document.getElementById("upi").value;
+  const waLink = document.getElementById("wa").value;
 
   let media = "";
 
@@ -147,16 +142,14 @@ function generate(){
     media = `<img src="${uploadedImage}" style="width:100%;border-radius:16px;margin:20px 0;">`;
   } else if(vid){
     const embed = vid.replace("watch?v=","embed/");
-    media = `<iframe width="100%" height="315"
-      src="${embed}"
-      style="border-radius:16px;margin:20px 0;"
-      allowfullscreen></iframe>`;
+    media = `<iframe width="100%" height="315" src="${embed}"
+      style="border-radius:16px;margin:20px 0;" allowfullscreen></iframe>`;
   }
 
   const link = `lp.html?t=${encodeURIComponent(h)}&s=${encodeURIComponent(s)}&a=${amt}&upi=${encodeURIComponent(upiLink)}&wa=${encodeURIComponent(waLink)}&c=${c}`;
-  publicLink.value = location.origin + "/" + link;
+  document.getElementById("publicLink").value = link;
 
-  preview.srcdoc = `
+  document.getElementById("preview").srcdoc = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -178,8 +171,7 @@ body{margin:0;font-family:Inter;background:#f8fafc}
 ${media}
 <div class="card">
 <h2>Entry Fee: ₹${amt}</h2>
-<button class="btn pay" onclick="handlePayment()">Pay & Join</button>
-
+<a class="btn pay" href="${upiLink}">Pay & Join</a>
 <a class="btn wa" href="${waLink}">Join WhatsApp Group</a>
 </div>
 </div>
@@ -194,50 +186,7 @@ function copyLink(){
 function shareWA(){
   window.open("https://wa.me/?text=" + encodeURIComponent(publicLink.value));
 }
-  
-<script>
-function isMobile(){
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-function handlePayment(){
-  const upi = "${upiLink}";
-
-  if(isMobile()){
-    // 📱 Mobile → Direct UPI app
-    window.location.href = upi;
-  } else {
-    // 💻 Desktop → Show QR
-    const qrUrl =
-      "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" +
-      encodeURIComponent(upi);
-
-    const qrWindow = window.open("", "_blank");
-    qrWindow.document.write(`
-      <html>
-      <head>
-        <title>Scan to Pay</title>
-        <style>
-          body{
-            font-family:Arial;
-            text-align:center;
-            padding:40px;
-            background:#f8fafc;
-          }
-          img{border-radius:12px}
-        </style>
-      </head>
-      <body>
-        <h2>Scan QR Code to Pay</h2>
-        <img src="${qrUrl}">
-        <p>Use any UPI app</p>
-      </body>
-      </html>
-    `);
-  }
-}
 </script>
-
 
 </body>
 </html>
