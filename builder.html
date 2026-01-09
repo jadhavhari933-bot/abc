@@ -131,27 +131,29 @@ function generate(){
   const c = document.getElementById("color").value.replace("#","");
   const h = document.getElementById("headline").value || "Landing Page";
   const s = document.getElementById("sub").value || "";
-  const vid = document.getElementById("video").value;
   const amt = document.getElementById("amount").value;
   const upiLink = document.getElementById("upi").value;
   const waLink = document.getElementById("wa").value;
 
-  let media = "";
+  // public link params
+  const link =
+    "lp.html" +
+    "?t=" + encodeURIComponent(h) +
+    "&s=" + encodeURIComponent(s) +
+    "&a=" + encodeURIComponent(amt) +
+    "&upi=" + encodeURIComponent(upiLink) +
+    "&wa=" + encodeURIComponent(waLink) +
+    "&c=" + encodeURIComponent(c);
 
-  if(uploadedImage){
-    media = `<img src="${uploadedImage}" style="width:100%;border-radius:16px;margin:20px 0;">`;
-  } else if(vid){
-    const embed = vid.replace("watch?v=","embed/");
-    media = `<iframe width="100%" height="315" src="${embed}"
-      style="border-radius:16px;margin:20px 0;" allowfullscreen></iframe>`;
-  }
+  const fullUrl = window.location.origin + "/" + link;
 
-  const link = `lp.html?t=${encodeURIComponent(h)}&s=${encodeURIComponent(s)}&a=${amt}&upi=${encodeURIComponent(upiLink)}&wa=${encodeURIComponent(waLink)}&c=${c}`;
-  document.getElementById("publicLink").value =
-  window.location.origin + "/lp.html?" + link.split("?")[1];
+  // show link
+  document.getElementById("publicLink").value = fullUrl;
 
+  // 🔥 LIVE PREVIEW = SAME AS PUBLIC PAGE
+  document.getElementById("preview").src = fullUrl;
+}
 
-  document.getElementById("preview").srcdoc = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -192,4 +194,5 @@ function shareWA(){
 
 </body>
 </html>
+
 
