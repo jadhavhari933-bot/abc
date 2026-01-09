@@ -147,7 +147,9 @@ function generate(){
   }
 
   const link = `lp.html?t=${encodeURIComponent(h)}&s=${encodeURIComponent(s)}&a=${amt}&upi=${encodeURIComponent(upiLink)}&wa=${encodeURIComponent(waLink)}&c=${c}`;
-  document.getElementById("publicLink").value = link;
+  document.getElementById("publicLink").value =
+  window.location.origin + "/lp.html?" + link.split("?")[1];
+
 
   document.getElementById("preview").srcdoc = `
 <!DOCTYPE html>
@@ -190,3 +192,4 @@ function shareWA(){
 
 </body>
 </html>
+
