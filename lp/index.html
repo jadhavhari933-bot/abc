@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Landing Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<script>
+/* 1. URL se data uthao */
+const p = new URLSearchParams(window.location.search);
+
+const title = p.get("t") || "Landing Page";
+const sub   = p.get("s") || "";
+const amt   = p.get("a") || "0";
+const upi   = p.get("upi") || "";
+const wa    = p.get("wa") || "";
+const color = p.get("c") || "16a34a";
+
+/* 2. Page render karo */
+document.body.innerHTML = `
+  <div style="background:#${color};padding:30px;text-align:center;color:#fff">
+    <h1>${title}</h1>
+    <p>${sub}</p>
+  </div>
+
+  <div style="max-width:720px;margin:auto;padding:20px">
+    <h2>Entry Fee: ₹${amt}</h2>
+
+    <a href="upi://pay?pa=${upi}&am=${amt}&cu=INR"
+       style="display:block;margin:15px 0;padding:16px;
+              background:#dc2626;color:#fff;text-align:center;
+              border-radius:999px;text-decoration:none">
+      Pay & Join
+    </a>
+
+    ${wa ? `
+    <a href="${wa}"
+       style="display:block;margin:15px 0;padding:16px;
+              background:#22c55e;color:#000;text-align:center;
+              border-radius:999px;text-decoration:none">
+      Join WhatsApp Group
+    </a>` : ""}
+  </div>
+`;
+</script>
+
+</body>
+</html>
 
