@@ -2,179 +2,242 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PayMoney Builder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landing Page Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
-  font-family:Inter, Arial, sans-serif;
-  background:#f5f7fb;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
+  font-family:Inter,system-ui,Arial;
+  background:#f1f5f9;
 }
-
+.wrapper{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+  display:grid;
+  grid-template-columns:1fr 1.2fr;
+  gap:20px;
+}
+@media(max-width:900px){
+  .wrapper{grid-template-columns:1fr}
+}
 .card{
-  background:#ffffff;
-  width:420px;
-  padding:26px;
-  border-radius:22px;
-  box-shadow:0 18px 45px rgba(0,0,0,.15);
-}
-
-h2{
-  margin:0;
-  text-align:center;
-  color:#0D3B66;
-}
-
-.sub{
-  text-align:center;
-  font-size:14px;
-  color:#555;
-  margin-top:6px;
-}
-
-input, textarea{
-  width:100%;
-  margin-top:14px;
-  padding:14px;
-  border-radius:12px;
-  border:1px solid #ddd;
-  font-size:15px;
-}
-
-textarea{
-  resize:none;
-}
-
-button{
-  width:100%;
-  margin-top:20px;
-  padding:16px;
-  border:none;
+  background:#fff;
   border-radius:16px;
-  background:#0D3B66;
-  color:#fff;
+  padding:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+label{
+  font-weight:600;
+  font-size:14px;
+  margin-top:14px;
+  display:block;
+}
+input{
+  width:100%;
+  padding:12px 14px;
+  margin-top:6px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+}
+button{
+  margin-top:20px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
   font-size:16px;
   font-weight:700;
   cursor:pointer;
+  background:#2563eb;
+  color:#fff;
 }
-
-.result{
-  display:none;
-  margin-top:18px;
+iframe{
+  width:100%;
+  height:650px;
+  border:none;
+  border-radius:14px;
 }
-
-.link{
-  font-size:13px;
-  word-break:break-all;
-  color:#0D3B66;
-  text-decoration:underline;
-  cursor:pointer;
+.small-btn{
+  margin-top:10px;
+  background:#0f172a;
 }
-
-.copy{
-  margin-top:12px;
-  background:#16a34a;
-}
-
-.copy.copied{
-  background:#15803d;
-}
-
-.note{
-  margin-top:14px;
-  font-size:12px;
-  text-align:center;
-  color:#777;
+.share-btn{
+  background:#22c55e;
 }
 </style>
 </head>
 
 <body>
 
+<div class="wrapper">
+
+<!-- BUILDER -->
 <div class="card">
-  <h2>PayMoney Builder</h2>
-  <p class="sub">Create smart payment landing page link</p>
+  <h2>Create Your Landing Page</h2>
 
-  <input id="title" placeholder="Title (eg. Online Course)">
-  <textarea id="desc" rows="2" placeholder="Description"></textarea>
-  <input id="amount" type="number" placeholder="Amount (₹)">
-  <input id="upi" placeholder="UPI ID (example@upi)">
+  <label>Theme Color</label>
+  <input type="color" id="color" value="#16a34a">
 
-  <!-- IMAGE URL -->
-  <input id="imageUrl" placeholder="Image URL (https://...)">
+  <label>Headline</label>
+  <input id="headline" placeholder="3 Day Yoga Class">
 
-  <!-- WHATSAPP GROUP -->
-  <input id="groupName" placeholder="Access Group Name (eg. VIP Learning Group)">
-  <input id="groupLink" placeholder="WhatsApp Group Link (https://chat.whatsapp.com/...)">
+  <label>Sub Headline</label>
+  <input id="sub" placeholder="Join for better health">
 
-  <button onclick="generate()">Generate Landing Page Link</button>
+  <label>Upload Image (Gallery)</label>
+  <input type="file" id="imageFile" accept="image/*">
 
-  <div class="result" id="result">
-    <div class="link" id="finalLink" onclick="openLink()"></div>
-    <button class="copy" id="copyBtn" onclick="copyLink()">Copy Link</button>
-  </div>
+  <label>YouTube Video Link (optional)</label>
+  <input id="video" placeholder="https://youtube.com/watch?v=...">
 
-  <div class="note">
-    One link • Mobile UPI • Desktop QR • WhatsApp Group Access
-  </div>
+  <label>Entry Fee (₹)</label>
+  <input id="amount" value="500">
+
+  <label>UPI Payment Link</label>
+  <input id="upi" placeholder="upi://pay?pa=...">
+
+  <label>WhatsApp Group Link</label>
+  <input id="wa" placeholder="https://chat.whatsapp.com/...">
+
+  <button onclick="generate()">Generate Live Preview</button>
+</div>
+
+<!-- PREVIEW -->
+<div class="card">
+  <h3>Live Preview</h3>
+  <iframe id="preview"></iframe>
+
+  <h4>Landing Page Link</h4>
+  <input id="publicLink" readonly onclick="this.select()">
+
+  <button class="small-btn" onclick="copyLink()">📋 Copy Link</button>
+  <button class="share-btn" onclick="shareWA()">📤 Share on WhatsApp</button>
+</div>
+
 </div>
 
 <script>
-let finalURL = "";
+let uploadedImage = "";
+
+document.getElementById("imageFile").addEventListener("change", function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => uploadedImage = reader.result;
+  reader.readAsDataURL(file);
+});
 
 function generate(){
-  const title = encodeURIComponent(document.getElementById("title").value);
-  const desc  = encodeURIComponent(document.getElementById("desc").value);
-  const amt   = document.getElementById("amount").value;
-  const upi   = document.getElementById("upi").value.trim();
-  const img   = document.getElementById("imageUrl").value.trim();
-  const gname = encodeURIComponent(document.getElementById("groupName").value);
-  const glink = encodeURIComponent(document.getElementById("groupLink").value);
+  const c = color.value.replace("#","");
+  const h = headline.value;
+  const s = sub.value;
+  const vid = video.value;
+  const amt = amount.value;
+  const upiLink = upi.value;
+  const waLink = wa.value;
 
-  if(!upi || upi.indexOf("@") === -1){
-    alert("Enter valid UPI ID");
-    return;
+  let media = "";
+
+  if(uploadedImage){
+    media = `<img src="${uploadedImage}" style="width:100%;border-radius:16px;margin:20px 0;">`;
+  } else if(vid){
+    const embed = vid.replace("watch?v=","embed/");
+    media = `<iframe width="100%" height="315"
+      src="${embed}"
+      style="border-radius:16px;margin:20px 0;"
+      allowfullscreen></iframe>`;
   }
-  if(!amt || amt <= 0){
-    alert("Enter valid amount");
-    return;
-  }
 
-  finalURL =
-    "https://www.paymoney24.in/lp.html" +
-    "?title=" + title +
-    "&desc=" + desc +
-    "&amount=" + amt +
-    "&upi=" + encodeURIComponent(upi) +
-    "&image=" + encodeURIComponent(img) +
-    "&group=" + gname +
-    "&grouplink=" + glink;
+  const link = `lp.html?t=${encodeURIComponent(h)}&s=${encodeURIComponent(s)}&a=${amt}&upi=${encodeURIComponent(upiLink)}&wa=${encodeURIComponent(waLink)}&c=${c}`;
+  publicLink.value = location.origin + "/" + link;
 
-  document.getElementById("finalLink").innerText = finalURL;
-  document.getElementById("result").style.display = "block";
+  preview.srcdoc = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{margin:0;font-family:Inter;background:#f8fafc}
+.hero{background:#${c};color:#fff;padding:40px 20px;text-align:center}
+.box{max-width:900px;margin:auto;padding:20px}
+.btn{display:block;text-align:center;padding:16px;border-radius:999px;font-weight:700;text-decoration:none;margin-top:14px}
+.pay{background:#dc2626;color:#fff}
+.wa{background:#22c55e;color:#000}
+.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.08);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="hero"><h1>${h}</h1><p>${s}</p></div>
+<div class="box">
+${media}
+<div class="card">
+<h2>Entry Fee: ₹${amt}</h2>
+<button class="btn pay" onclick="handlePayment()">Pay & Join</button>
 
-  const btn = document.getElementById("copyBtn");
-  btn.innerText = "Copy Link";
-  btn.classList.remove("copied");
-}
-
-function openLink(){
-  window.open(finalURL, "_blank");
+<a class="btn wa" href="${waLink}">Join WhatsApp Group</a>
+</div>
+</div>
+</body>
+</html>`;
 }
 
 function copyLink(){
-  navigator.clipboard.writeText(finalURL).then(()=>{
-    const btn = document.getElementById("copyBtn");
-    btn.innerText = "Copied ✓";
-    btn.classList.add("copied");
-  });
+  navigator.clipboard.writeText(publicLink.value);
+  alert("Link copied!");
+}
+function shareWA(){
+  window.open("https://wa.me/?text=" + encodeURIComponent(publicLink.value));
+}
+  
+<script>
+function isMobile(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function handlePayment(){
+  const upi = "${upiLink}";
+
+  if(isMobile()){
+    // 📱 Mobile → Direct UPI app
+    window.location.href = upi;
+  } else {
+    // 💻 Desktop → Show QR
+    const qrUrl =
+      "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" +
+      encodeURIComponent(upi);
+
+    const qrWindow = window.open("", "_blank");
+    qrWindow.document.write(`
+      <html>
+      <head>
+        <title>Scan to Pay</title>
+        <style>
+          body{
+            font-family:Arial;
+            text-align:center;
+            padding:40px;
+            background:#f8fafc;
+          }
+          img{border-radius:12px}
+        </style>
+      </head>
+      <body>
+        <h2>Scan QR Code to Pay</h2>
+        <img src="${qrUrl}">
+        <p>Use any UPI app</p>
+      </body>
+      </html>
+    `);
+  }
 }
 </script>
+
 
 </body>
 </html>
